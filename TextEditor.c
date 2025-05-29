@@ -23,6 +23,9 @@ int WordSearch(char *line, char *word) {
 	// Input validation : a pattern longer than the text cannot be present in the text
 	if (word_length > line_length) return -1;
 
+	// Edge case : empty pattern
+	if (word_length == 0) return 0;
+
 	// Edge case : pattern and text are the same size
 	if (word_length == line_length) {
 		// Check if the pattern and text are the same
@@ -45,7 +48,7 @@ int WordSearch(char *line, char *word) {
 			LPS[suffixPointer] = prefixPointer; // Number of characters to skip for this suffix (characters that already match line characters)
 			suffixPointer++;
 		} else {
-			if (j != 0) {
+			if (prefixPointer != 0) {
 				// Set prefix pointer back (may be able to skip some characters)
 				prefixPointer = LPS[prefixPointer - 1];
 			} else {
@@ -69,7 +72,7 @@ int WordSearch(char *line, char *word) {
 			// Check if the word was found (pattern completely matches a substring of the text)
 			if (wordPointer == word_length) return linePointer - wordPointer; // Return first match index
 		} else {
-			if (j != 0) {
+			if (wordPointer != 0) {
 				// Set word pointer back
 				// We can skip the number of characters that we already know matches the line characters
 				wordPointer = LPS[wordPointer - 1];
