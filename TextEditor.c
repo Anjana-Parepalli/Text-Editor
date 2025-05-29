@@ -14,26 +14,73 @@
 #include <string.h>
 
 // Searches for a word in a string and returns the index of its first occurence
-int WordSearch(char *string, char *word) {
-	int string_length = strlen(string);
+// Uses the Knutt-Morris-Pratt pattern searching algorithm
+int WordSearch(char *line, char *word) {
+	// Store the lengths of the line and word strings
+	int line_length = strlen(line);
 	int word_length = strlen(word);
 
-	// Base case : word length exceeds string length
-	if (word_length > string_length) return -1;
+	// Input validation : a pattern longer than the text cannot be present in the text
+	if (word_length > line_length) return -1;
 
-	// Search for the word
-	for (int i = 0; i <= (string_length - word_length); i++) {
-		int j;
-		for (j = 0; j < word_length; j++) {
-			// Compare between text and pattern (string and word) until a mismatch is found
-			if (string[i + j] != word[j]) break;
-		}
-
-		// Check if the word was found fully in the given string
-		if (j == word_length) return i;
+	// Edge case : pattern and text are the same size
+	if (word_length == line_length) {
+		// Check if the pattern and text are the same
+		if (strcmp(line, word) == 0) return 0;
+		else return -1;
 	}
 
-	// Return -1 when no match is found
+	// Construct the Longest Prefix-Suffix array
+	int *LPS = (int *) calloc(word_length, sizeof(int));
+
+	// Use two pointers to keep track of the prefixes and suffixes of the word (pattern)
+	int prefixPointer = 0;
+	int suffixPointer = 1;
+	
+	while (suffixPointer < word_length) {
+		// Check if the prefix and suffix characters match
+		if (word[suffixPointer] == word[prefixPointer]) {
+			// Advance prefix and suffix pointers
+			prefixPointer++;
+			LPS[suffixPointer] = prefixPointer; // Number of characters to skip for this suffix (characters that already match line characters)
+			suffixPointer++;
+		} else {
+			if (j != 0) {
+				// Set prefix pointer back (may be able to skip some characters)
+				prefixPointer = LPS[prefixPointer - 1];
+			} else {
+				// Advance suffix pointer
+				suffixPointer++;
+			}
+		}
+	}
+
+	// Use two pointers to keep track of the word (pattern) and line (text) strings
+	int wordPointer = 0;
+	int linePointer = 0;
+
+	while (linePointer < line_length) {
+		// Check if the current word character matches the current line character
+		if (word[wordPointer] == line[linePointer]) {
+			// Advance word and line pointers
+			wordPointer++;
+			linePointer++;
+
+			// Check if the word was found (pattern completely matches a substring of the text)
+			if (wordPointer == word_length) return linePointer - wordPointer; // Return first match index
+		} else {
+			if (j != 0) {
+				// Set word pointer back
+				// We can skip the number of characters that we already know matches the line characters
+				wordPointer = LPS[wordPointer - 1];
+			} else {
+				// Advance line pointer
+				linePointer++;
+			}
+		}
+	}
+
+	// Return -1 if no match was found
 	return -1;
 }
 
