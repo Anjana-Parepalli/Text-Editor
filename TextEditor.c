@@ -43,9 +43,13 @@ int WordSearch(char *line, char *word) {
 	while (suffixPointer < word_length) {
 		// Check if the prefix and suffix characters match
 		if (word[suffixPointer] == word[prefixPointer]) {
-			// Advance prefix and suffix pointers
+			// Advance prefix pointer
 			prefixPointer++;
-			LPS[suffixPointer] = prefixPointer; // Number of characters to skip for this suffix (characters that already match line characters)
+
+			// Can skip these many characters from prefix pointer is encountered
+			LPS[suffixPointer] = prefixPointer;
+
+			// Advance suffix pointer
 			suffixPointer++;
 		} else {
 			if (prefixPointer != 0) {
@@ -70,7 +74,13 @@ int WordSearch(char *line, char *word) {
 			linePointer++;
 
 			// Check if the word was found (pattern completely matches a substring of the text)
-			if (wordPointer == word_length) return linePointer - wordPointer; // Return first match index
+			if (wordPointer == word_length) {
+				// Free LPS table from heap memory
+				free(LPS);
+
+				// Return the index of the first match
+				return linePointer - wordPointer;
+			}
 		} else {
 			if (wordPointer != 0) {
 				// Set word pointer back
@@ -82,7 +92,9 @@ int WordSearch(char *line, char *word) {
 			}
 		}
 	}
-
+	// Free LPS table from heap memory
+	free(LPS);
+	
 	// Return -1 if no match was found
 	return -1;
 }
